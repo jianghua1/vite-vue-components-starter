@@ -5,9 +5,14 @@ import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import { resolve } from "path";
 
+import pkg from "./package.json";
+import dts from "vite-plugin-dts";
+
+const pkgName = pkg.name;
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueJsx()],
+  plugins: [vue(), vueJsx(), dts({ rollupTypes: true })],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -15,12 +20,14 @@ export default defineConfig({
   },
 
   build: {
+    sourcemap: true,
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "src/main.ts"),
-      name: "MyLib",
+      name: pkgName,
       // the proper extensions will be added
-      fileName: "my-lib",
+      formats: ["es", "umd"],
+      fileName: (format) => `${pkgName}.${format}.ts`,
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖
